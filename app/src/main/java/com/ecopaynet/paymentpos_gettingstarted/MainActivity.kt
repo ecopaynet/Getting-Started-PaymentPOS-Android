@@ -188,10 +188,10 @@ class MainActivity : AppCompatActivity(), Events.Initialization, Events.Log {
     private fun setDeviceInformation() {
         val (_, environment, commerceName, commerceAddress, commerceNumber, commerceCurrency) = PaymentPOS.getInformation()
         var deviceInformation = ""
-        deviceInformation += "Environment: $environment"
-        deviceInformation += "Commerce name: $commerceName"
-        deviceInformation += "Commerce address: $commerceAddress"
-        deviceInformation += "Commerce number: $commerceNumber"
+        deviceInformation += "Environment: $environment\r\n"
+        deviceInformation += "Commerce name: $commerceName\r\n"
+        deviceInformation += "Commerce address: $commerceAddress\r\n"
+        deviceInformation += "Commerce number: $commerceNumber\r\n"
         deviceInformation += "Currency: ${commerceCurrency!!.alpha}"
         deviceInformationTextView.text = deviceInformation
     }

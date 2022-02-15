@@ -27,7 +27,7 @@ class SignatureActivity : AppCompatActivity() {
         val signatureContinueButton = findViewById<View>(R.id.signatureContinueButton) as Button
         signatureContinueButton.setOnClickListener {
             val intent = Intent()
-            intent.putExtra("SIGNATURE_BITMAP", signatureView.getSignatureBitmap())
+            intent.putExtra("SIGNATURE_BITMAP", signatureView.getSignatureByteArray())
             setResult(RESULT_OK, intent)
             finish()
         }

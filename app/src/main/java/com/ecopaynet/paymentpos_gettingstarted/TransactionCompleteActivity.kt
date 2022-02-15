@@ -4,6 +4,7 @@ import android.annotation.TargetApi
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.pdf.PdfDocument
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
@@ -50,11 +51,23 @@ class TransactionCompleteActivity : AppCompatActivity() {
 
     private fun fillTransactionResult() {
         try {
-            val tickets = PaymentPOS.generateTransactionTicketsBMP(
+            var ticketWithBorder: Bitmap? = null
+            val commerceTicket = PaymentPOS.generateCommerceTransactionTicketBMP(
                 transactionResult, null
             )
-            val commerceTicketWithBorder = addBorder(tickets!![0], Color.BLACK, 2)
-            transactionResultImageView.setImageBitmap(commerceTicketWithBorder)
+            if(commerceTicket != null) {
+                ticketWithBorder = addBorder(commerceTicket, Color.BLACK, 2)
+            } else {
+                val cardholderTicket = PaymentPOS.generateCardholderTransactionTicketBMP(
+                    transactionResult, null
+                )
+                if(cardholderTicket != null) {
+                    ticketWithBorder = addBorder(cardholderTicket, Color.BLACK, 2)
+                }
+            }
+            if(ticketWithBorder != null) {
+                transactionResultImageView.setImageBitmap(ticketWithBorder)
+            }
         } catch (ex: Exception) {
             println(ex.message)
         }
@@ -75,16 +88,22 @@ class TransactionCompleteActivity : AppCompatActivity() {
     @TargetApi(19)
     private fun saveTicketsPDF() {
         try {
-            val tickets = PaymentPOS.generateTransactionTicketsPDF(
-                transactionResult, null
-            )
             val ticketsFolder = File(getExternalFilesDir(null), "/PaymentPOS/Tickets")
             if (!ticketsFolder.exists()) ticketsFolder.mkdirs()
             val fileDateTime = SimpleDateFormat("yyyyMMddHHmmss").format(Date())
-            for (i in tickets!!.indices) {
-                val fileName =
-                    getExternalFilesDir(null).toString() + "/PaymentPOS/Tickets/" + fileDateTime + (if (i == 0) "" else "_CC") + ".pdf"
-                tickets[i].writeTo(FileOutputStream(fileName, false))
+
+            val commerceTicket = PaymentPOS.generateCommerceTransactionTicketPDF(transactionResult, null)
+            if(commerceTicket != null) {
+                val commerceTicketFileName =
+                    getExternalFilesDir(null).toString() + "/PaymentPOS/Tickets/" + fileDateTime + ".pdf"
+                commerceTicket.writeTo(FileOutputStream(commerceTicketFileName, false))
+            }
+
+            val cardholderTicket = PaymentPOS.generateCardholderTransactionTicketPDF(transactionResult, null)
+            if(cardholderTicket != null) {
+                val cardholderTicketFileName =
+                    getExternalFilesDir(null).toString() + "/PaymentPOS/Tickets/" + fileDateTime + "_CC.pdf"
+                cardholderTicket.writeTo(FileOutputStream(cardholderTicketFileName, false))
             }
         } catch (ex: Exception) {
             println(ex.message)
@@ -93,20 +112,30 @@ class TransactionCompleteActivity : AppCompatActivity() {
 
     private fun saveTicketsImage() {
         try {
-            val tickets = PaymentPOS.generateTransactionTicketsBMP(
-                transactionResult, null
-            )
             val ticketsFolder = File(getExternalFilesDir(null), "/PaymentPOS/Tickets")
             if (!ticketsFolder.exists()) ticketsFolder.mkdirs()
             val fileDateTime = SimpleDateFormat("yyyyMMddHHmmss").format(Date())
-            for (i in tickets!!.indices) {
-                val fileName = getExternalFilesDir(null)
-                    .toString() + "/PaymentPOS/Tickets/" + fileDateTime + (if (i == 0) "" else "_CC") + ".png"
-                val out: OutputStream = FileOutputStream(fileName, false)
-                tickets[i].compress(Bitmap.CompressFormat.PNG, 100, out)
-                out.close()
+
+            val commerceTicket = PaymentPOS.generateCommerceTransactionTicketBMP(transactionResult, null)
+            if(commerceTicket != null) {
+                val commerceTicketFileName =
+                    getExternalFilesDir(null).toString() + "/PaymentPOS/Tickets/" + fileDateTime + ".png"
+                saveTicketImage(commerceTicket, commerceTicketFileName)
+            }
+
+            val cardholderTicket = PaymentPOS.generateCommerceTransactionTicketBMP(transactionResult, null)
+            if(cardholderTicket != null) {
+                val cardholderTicketFileName =
+                    getExternalFilesDir(null).toString() + "/PaymentPOS/Tickets/" + fileDateTime + "_CC.png"
+                saveTicketImage(cardholderTicket, cardholderTicketFileName)
             }
         } catch (ex: Exception) {
         }
+    }
+
+    private fun saveTicketImage(ticketBitmap: Bitmap, filename: String) {
+        val out: OutputStream = FileOutputStream(filename, false)
+        ticketBitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+        out.close()
     }
 }
