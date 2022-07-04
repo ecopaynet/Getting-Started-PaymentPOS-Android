@@ -123,7 +123,7 @@ class TransactionCompleteActivity : AppCompatActivity() {
                 saveTicketImage(commerceTicket, commerceTicketFileName)
             }
 
-            val cardholderTicket = PaymentPOS.generateCommerceTransactionTicketBMP(transactionResult, null)
+            val cardholderTicket = PaymentPOS.generateCardholderTransactionTicketBMP(transactionResult, null)
             if(cardholderTicket != null) {
                 val cardholderTicketFileName =
                     getExternalFilesDir(null).toString() + "/PaymentPOS/Tickets/" + fileDateTime + "_CC.png"
